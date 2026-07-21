@@ -1,0 +1,473 @@
+<!-- المسار: fallacy_analyzer_cloud/api/static/index.html -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محلل المغالطات المنطقية - التطبيق السحابي</title>
+    
+    <!-- إعدادات تطبيق الويب التقدمي (PWA) للتثبيت على جميع الهواتف -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="محلل المغالطات">
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22%D9%85%D8%AD%D9%84%D9%84%20%D8%A7%D9%84%D9%85%D8%BA%D8%A7%D9%84%D8%B7%D8%A7%D8%AA%20%D8%A7%D9%84%D9%85%D9%86%D8%B7%D9%82%D9%8A%D8%A9%22%2C%22short_name%22%3A%22%D9%85%D8%AD%D9%84%D9%84%20%D8%A7%D9%84%D9%85%D8%BA%D8%A7%D9%84%D8%B7%D8%A7%D8%AA%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
+
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --heading-color: #1a2530;
+            --border-color: #ccc;
+            --card-bg: #f8f9fa;
+            --example-btn-bg: #e2e8f0;
+            --example-btn-text: #1e293b;
+            --history-item-bg: #ffffff;
+            --history-item-border: #e2e8f0;
+        }
+
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --heading-color: #f8fafc;
+            --border-color: #475569;
+            --card-bg: #334155;
+            --example-btn-bg: #334155;
+            --example-btn-text: #cbd5e1;
+            --history-item-bg: #1e293b;
+            --history-item-border: #475569;
+        }
+
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; transition: background-color 0.3s, color 0.3s; }
+        .container { max-width: 850px; margin: 0 auto; background: var(--container-bg); padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: background-color 0.3s; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        h1 { color: var(--heading-color); margin: 0; font-size: 20px; }
+        .header-controls { display: flex; gap: 8px; align-items: center; }
+        .status-pill { font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 5px; }
+        .status-online { background-color: #dcfce7; color: #166534; }
+        .status-offline { background-color: #fee2e2; color: #991b1b; }
+        .theme-toggle-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        
+        .server-alert-banner { background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px; border-radius: 6px; font-size: 14px; font-weight: bold; margin-bottom: 15px; display: none; text-align: center; }
+
+        .label-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        label { font-weight: bold; margin: 0; }
+        .import-btn { background-color: #0284c7; color: #ffffff; border: none; padding: 5px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .import-btn:hover { background-color: #0369a1; }
+
+        textarea { width: 100%; height: 110px; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; box-sizing: border-box; resize: vertical; background-color: var(--container-bg); color: var(--text-color); }
+        .examples-container { margin: 12px 0; display: flex; gap: 8px; flex-wrap: wrap; }
+        .example-btn { background-color: var(--example-btn-bg); color: var(--example-btn-text); border: 1px solid var(--border-color); padding: 6px 12px; font-size: 13px; border-radius: 4px; cursor: pointer; font-weight: 500; }
+        .example-btn:hover { opacity: 0.8; }
+        .main-buttons-group { display: flex; gap: 10px; margin-top: 10px; }
+        .submit-btn { flex: 3; background-color: #0066cc; color: #ffffff; border: none; padding: 12px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .submit-btn:hover { background-color: #0052a3; }
+        .submit-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .reset-btn { flex: 1; background-color: #64748b; color: #ffffff; border: none; padding: 12px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .reset-btn:hover { background-color: #475569; }
+        
+        .result-card { margin-top: 25px; padding: 18px; border-radius: 6px; background-color: var(--card-bg); border-right: 4px solid #0066cc; display: none; }
+        .badge { display: inline-block; padding: 6px 12px; background: #e0f2fe; color: #0369a1; border-radius: 4px; font-weight: bold; font-size: 15px; margin-bottom: 10px; }
+        
+        .severity-container { margin: 15px 0; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 6px; }
+        .severity-label { font-size: 13px; font-weight: bold; margin-bottom: 5px; display: block; }
+        .severity-bar-bg { width: 100%; height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; }
+        .severity-bar-fill { height: 100%; width: 0%; transition: width 0.5s ease-in-out, background-color 0.5s; }
+
+        .actions-group { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+        .action-btn { flex: 1; min-width: 140px; border: none; padding: 10px; font-size: 13px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #ffffff; text-align: center; }
+        .copy-btn { background-color: #16a34a; }
+        .copy-btn:hover { background-color: #15803d; }
+        .download-btn { background-color: #d97706; }
+        .download-btn:hover { background-color: #b45309; }
+        .share-btn { background-color: #2563eb; }
+        .share-btn:hover { background-color: #1d4ed8; }
+
+        h3, h4 { color: var(--heading-color); margin-top: 15px; margin-bottom: 8px; }
+        ul { padding-right: 20px; margin: 5px 0; }
+        li { margin-bottom: 5px; line-height: 1.5; }
+        .history-section { margin-top: 35px; border-top: 2px dashed var(--border-color); padding-top: 20px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .clear-btn { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .history-item { background: var(--history-item-bg); border: 1px solid var(--history-item-border); border-radius: 6px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.2s; }
+        .history-item:hover { border-color: #0066cc; }
+        .history-title { font-weight: bold; font-size: 14px; color: #38bdf8; margin-bottom: 4px; }
+        .history-snippet { font-size: 13px; color: var(--text-color); opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <h1>محلل المغالطات المنطقية (السحابي PWA)</h1>
+            <div class="header-controls">
+                <span id="serverStatusPill" class="status-pill status-online">الخادم: متصل 🟢</span>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">الوضع الداكن 🌙</button>
+            </div>
+        </div>
+
+        <div id="serverAlertBanner" class="server-alert-banner">
+            ⚠️ تنبيه: تعذر الاتصال بالخادم السحابي! جاري إعادة المحاولة...
+        </div>
+        
+        <div class="label-container">
+            <label for="argumentInput">أدخل النص الحجاجي للتحليل:</label>
+            <button class="import-btn" onclick="document.getElementById('fileInput').click()">استيراد ملف نصي (.txt) 📂</button>
+            <input type="file" id="fileInput" accept=".txt" style="display: none;" onchange="handleFileUpload(event)">
+        </div>
+        
+        <textarea id="argumentInput" placeholder="أدخل النص هنا أو اختر مثالاً أو استورد ملفاً نصياً..."></textarea>
+        
+        <div class="examples-container">
+            <span style="font-size: 13px; font-weight: bold; align-self: center;">أمثلة جاهزة:</span>
+            <button class="example-btn" onclick="loadExample(1)">برهان أرسطي (سقراط فان)</button>
+            <button class="example-btn" onclick="loadExample(2)">برهان شرطي (نفي التالي)</button>
+            <button class="example-btn" onclick="loadExample(3)">مغالطة صورية (إثبات التالي)</button>
+            <button class="example-btn" onclick="loadExample(4)">مغالطة غير صورية (شخصنة)</button>
+            <button class="example-btn" onclick="loadExample(5)">مغالطة (تحويل عبء الإثبات)</button>
+        </div>
+
+        <div class="main-buttons-group">
+            <button class="submit-btn" id="submitBtn" onclick="analyzeArgument()">تحليل النص منطقياً</button>
+            <button class="reset-btn" onclick="resetForm()">تفريغ 🔄</button>
+        </div>
+
+        <div id="resultCard" class="result-card">
+            <h3>نتيجة التحليل المنطقي:</h3>
+            <div><span class="badge" id="classificationResult"></span></div>
+            
+            <div class="severity-container">
+                <span class="severity-label" id="severityText">مؤشر شدة المغالطة: -</span>
+                <div class="severity-bar-bg">
+                    <div class="severity-bar-fill" id="severityBar"></div>
+                </div>
+            </div>
+
+            <h4>المقدمات الصريحة المكتشفة:</h4>
+            <ul id="rawPremisesList"></ul>
+
+            <h4>الفرضيات والمقدمات المضمرة الخفية:</h4>
+            <ul id="implicitPremisesList"></ul>
+
+            <h4>النتيجة الاستدلالية:</h4>
+            <p id="conclusionText" style="font-weight: bold;"></p>
+
+            <div class="actions-group">
+                <button class="action-btn copy-btn" onclick="copyReport()">نسخ التقرير 📋</button>
+                <button class="action-btn download-btn" onclick="downloadTxtReport()">تنزيل ملف (.txt) 💾</button>
+                <button class="action-btn share-btn" onclick="shareReport()">مشاركة التقرير 📲</button>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-header">
+                <h3>سجل التحليلات السابقة (آخر 10 تحليلات):</h3>
+                <button class="clear-btn" onclick="clearHistory()">مسح السجل</button>
+            </div>
+            <div id="historyList">لا توجد تحليلات محفوظة بعد.</div>
+        </div>
+    </div>
+
+    <script>
+        const examples = {
+            1: "كل إنسان فان. سقراط إنسان. إذن سقراط فان.",
+            2: "إذا كانت النفقات أعلى من الإيرادات فإن الشركة في عجز. ولكن الشركة ليست في عجز. إذن النفقات ليست أعلى من الإيرادات.",
+            3: "إذا نزل المطر فإن الأرض تبتل. الأرض مبتلة. إذن المطر ينزل. بما أن النتيجة تحققت",
+            4: "هذا التحليل الاقتصادي باطل لأنه صدر من شخص كاذب وجاهل.",
+            5: "الأطباق الطائرة موجودة فعلاً في كوكب الأرض، وأثبت أنت عكس ذلك إن استطعت."
+        };
+
+        let lastAnalysisData = null;
+        let isServerOnline = true;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initTheme();
+            renderHistory();
+            checkServerHealth();
+            setInterval(checkServerHealth, 5000);
+        });
+
+        function getBaseApiUrl() {
+            return (window.location.origin && window.location.origin !== 'null' && !window.location.protocol.startsWith('file'))
+                ? window.location.origin
+                : 'http://127.0.0.1:8000';
+        }
+
+        async function checkServerHealth() {
+            const baseUrl = getBaseApiUrl();
+            const statusPill = document.getElementById('serverStatusPill');
+            const alertBanner = document.getElementById('serverAlertBanner');
+            const submitBtn = document.getElementById('submitBtn');
+
+            try {
+                const response = await fetch(`${baseUrl}/health`, { method: 'GET', cache: 'no-store' });
+                if (response.ok) {
+                    isServerOnline = true;
+                    statusPill.className = 'status-pill status-online';
+                    statusPill.innerText = 'الخادم: متصل 🟢';
+                    alertBanner.style.display = 'none';
+                    submitBtn.disabled = false;
+                } else {
+                    throw new Error('Server non-200');
+                }
+            } catch (err) {
+                isServerOnline = false;
+                statusPill.className = 'status-pill status-offline';
+                statusPill.innerText = 'الخادم: غير متصل 🔴';
+                alertBanner.style.display = 'block';
+                submitBtn.disabled = true;
+            }
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('fallacy_theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeBtn').innerText = 'الوضع الفاتح ☀️';
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('fallacy_theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeBtn').innerText = isDark ? 'الوضع الفاتح ☀️' : 'الوضع الداكن 🌙';
+        }
+
+        function resetForm() {
+            document.getElementById('argumentInput').value = '';
+            document.getElementById('resultCard').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            lastAnalysisData = null;
+        }
+
+        function loadExample(id) {
+            document.getElementById('argumentInput').value = examples[id];
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.txt')) {
+                alert('يرجى اختيار ملف نصي يحمل امتداد .txt فقط.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('argumentInput').value = e.target.result;
+                alert(`تم استيراد محتوى الملف (${file.name}) بنجاح! 📂`);
+            };
+            reader.onerror = function() {
+                alert('حدث خطأ أثناء قراءة الملف من الذاكرة.');
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        async function analyzeArgument() {
+            if (!isServerOnline) {
+                alert('عذراً، الخادم غير متصل حالياً.');
+                return;
+            }
+
+            const text = document.getElementById('argumentInput').value.trim();
+            if (!text) { alert('من فضلك أدخل نصاً للتحليل.'); return; }
+
+            const resultCard = document.getElementById('resultCard');
+            resultCard.style.display = 'none';
+
+            const baseUrl = getBaseApiUrl();
+
+            try {
+                const response = await fetch(`${baseUrl}/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    alert('خطأ: ' + (err.detail || 'تعذر معالجة النص'));
+                    return;
+                }
+
+                const data = await response.json();
+                lastAnalysisData = data;
+
+                displayResults(data);
+                saveToHistory(data);
+            } catch (e) {
+                alert('تعذر الاتصال بالخادم: ' + e.message);
+                checkServerHealth();
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('classificationResult').innerText = data.classification_result;
+            document.getElementById('conclusionText').innerText = data.extracted_conclusion;
+
+            const rawList = document.getElementById('rawPremisesList');
+            rawList.innerHTML = data.raw_premises.length > 0 
+                ? data.raw_premises.map(p => `<li>${p}</li>`).join('') 
+                : '<li>لا توجد مقدمات صريحة منفصلة</li>';
+
+            const implicitList = document.getElementById('implicitPremisesList');
+            implicitList.innerHTML = data.implicit_premises.length > 0 
+                ? data.implicit_premises.map(p => `<li>${p}</li>`).join('') 
+                : '<li>لا توجد مقدمات مضمرة مكتشفة</li>';
+
+            updateSeverityIndicator(data.classification_result);
+
+            document.getElementById('resultCard').style.display = 'block';
+        }
+
+        function updateSeverityIndicator(resultText) {
+            const severityText = document.getElementById('severityText');
+            const severityBar = document.getElementById('severityBar');
+
+            // 1. فحص البراهين والاستدلالات الصحيحة أولاً (تنسيق لون أخضر)
+            if (resultText.includes('برهان') || resultText.includes('سليمة') || resultText.includes('صحيح')) {
+                severityText.innerText = 'مؤشر شدة المغالطة: منعدمة (استدلال/برهان صحيح ومستوفٍ)';
+                severityText.style.color = '#10b981';
+                severityBar.style.width = '5%';
+                severityBar.style.backgroundColor = '#10b981';
+            } 
+            // 2. فحص المغالطات غير الصورية والحملية الأرسطية الخطأ (تنسيق لون برتقالي)
+            else if (resultText.includes('غير صورية') || resultText.includes('حملية')) {
+                severityText.innerText = 'مؤشر شدة المغالطة: متوسطة (انحراف دلالي/سياقي)';
+                severityText.style.color = '#f59e0b';
+                severityBar.style.width = '65%';
+                severityBar.style.backgroundColor = '#f59e0b';
+            } 
+            // 3. فحص المغالطات الصورية (تنسيق لون أحمر)
+            else if (resultText.includes('صورية')) {
+                severityText.innerText = 'مؤشر شدة المغالطة: عالية جداً (خلل بنيوي صوري)';
+                severityText.style.color = '#ef4444';
+                severityBar.style.width = '95%';
+                severityBar.style.backgroundColor = '#ef4444';
+            } 
+            // 4. الحالات الافتراضية
+            else {
+                severityText.innerText = 'مؤشر شدة المغالطة: غير محددة';
+                severityText.style.color = '#64748b';
+                severityBar.style.width = '30%';
+                severityBar.style.backgroundColor = '#64748b';
+            }
+        }
+
+        function buildReportText(data) {
+            return `=== تقرير التحليل المنطقي ===\n` +
+                `الحكم المنطقي: ${data.classification_result}\n\n` +
+                `النص الأصلي: ${data.original_text}\n\n` +
+                `المقدمات الصريحة:\n${data.raw_premises.map(p => `- ${p}`).join('\n') || '- لا توجد'}\n\n` +
+                `المقدمات المضمرة الخفية:\n${data.implicit_premises.map(p => `- ${p}`).join('\n') || '- لا توجد'}\n\n` +
+                `النتيجة الاستدلالية:\n${data.extracted_conclusion}`;
+        }
+
+        function copyReport() {
+            if (!lastAnalysisData) return;
+            const reportText = buildReportText(lastAnalysisData);
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(reportText).then(() => {
+                    alert('تم نسخ التقرير المنطقي إلى الحافظة بنجاح! 📋');
+                }).catch(() => fallbackCopyText(reportText));
+            } else {
+                fallbackCopyText(reportText);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('تم نسخ التقرير المنطقي إلى الحافظة بنجاح! 📋');
+            } catch (err) {
+                alert('تعذر النسخ التلقائي، يمكنك نسخ النص يدوياً.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function downloadTxtReport() {
+            if (!lastAnalysisData) return;
+            const reportText = buildReportText(lastAnalysisData);
+            const blob = new Blob([reportText], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `تقرير_تحليل_منطقي_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function shareReport() {
+            if (!lastAnalysisData) return;
+            const reportText = buildReportText(lastAnalysisData);
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'تقرير تحليل منطقي',
+                        text: reportText
+                    });
+                } catch (err) {
+                    // إلغاء المشاركة
+                }
+            } else {
+                copyReport();
+            }
+        }
+
+        function saveToHistory(data) {
+            let history = JSON.parse(localStorage.getItem('fallacy_history') || '[]');
+            history.unshift(data);
+            if (history.length > 10) history = history.slice(0, 10);
+            localStorage.setItem('fallacy_history', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const historyList = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem('fallacy_history') || '[]');
+
+            if (history.length === 0) {
+                historyList.innerHTML = 'لا توجد تحليلات محفوظة بعد.';
+                return;
+            }
+
+            historyList.innerHTML = history.map((item, index) => `
+                <div class="history-item" onclick="loadHistoryItem(${index})">
+                    <div class="history-title">${item.classification_result}</div>
+                    <div class="history-snippet">${item.original_text}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('fallacy_history') || '[]');
+            if (history[index]) {
+                lastAnalysisData = history[index];
+                document.getElementById('argumentInput').value = lastAnalysisData.original_text;
+                displayResults(lastAnalysisData);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('هل أنت تأكد من مسح جميع التحليلات المحفوظة؟')) {
+                localStorage.removeItem('fallacy_history');
+                renderHistory();
+            }
+        }
+    </script>
+</body>
+  </html>
